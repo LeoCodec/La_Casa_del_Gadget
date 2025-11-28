@@ -97,25 +97,24 @@
     <section class="category-cards">
         <h2>Explora por Categoría</h2>
         <div class="categories-grid">
-            <!-- Convertimos los DIVs en enlaces <A> para que funcionen -->
             
-            <a href="{{ url_for('main.productos_categoria', categoria_url='telefonos') }}" class="category-card">
+            <a href="{{ url_for('main.productos_categoria', categoria='telefonos') }}" class="category-card">
                 <i class="fas fa-mobile-alt"></i> Teléfonos
             </a>
 
-            <a href="{{ url_for('main.productos_categoria', categoria_url='tablets') }}" class="category-card">
+            <a href="{{ url_for('main.productos_categoria', categoria='tablets') }}" class="category-card">
                 <i class="fas fa-tablet-alt"></i> Tablets
             </a>
 
-            <a href="{{ url_for('main.productos_categoria', categoria_url='laptops') }}" class="category-card">
+            <a href="{{ url_for('main.productos_categoria', categoria='laptops') }}" class="category-card">
                 <i class="fas fa-laptop"></i> Laptops
             </a>
 
-            <a href="{{ url_for('main.productos_categoria', categoria_url='wearables') }}" class="category-card">
+            <a href="{{ url_for('main.productos_categoria', categoria='wearables') }}" class="category-card">
                 <i class="fas fa-clock"></i> Wearables
             </a>
 
-            <a href="{{ url_for('main.productos_categoria', categoria_url='accesorios') }}" class="category-card">
+            <a href="{{ url_for('main.productos_categoria', categoria='accesorios') }}" class="category-card">
                 <i class="fas fa-headphones"></i> Accesorios
             </a>
         </div>
