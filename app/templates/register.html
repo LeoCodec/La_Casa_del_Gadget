@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Registro - La Casa del Gadget{% endblock %}
+
+{% block content %}
+<div class="container-login">
+    <div class="login-card">
+        <h2>Crear Cuenta</h2>
+        <p>Regístrate para comprar y agendar citas</p>
+        <form method="POST" action="{{ url_for('main.register') }}">
+            <div class="form-group">
+                <label>Nombre de Usuario</label>
+                <input type="text" name="nombre_usuario" required>
+            </div>
+            <div class="form-group">
+                <label>Correo Electrónico</label>
+                <input type="email" name="correo" required>
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" name="contraseña" required>
+            </div>
+            <button type="submit" class="btn-submit">Registrarme</button>
+        </form>
+        <div class="login-links">
+            <a href="{{ url_for('main.login') }}">¿Ya tienes cuenta? Inicia sesión</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block title %}Agendar Cita - La Casa del Gadget{% endblock %}
+
+{% block content %}
+<div class="container-citas">
+    
+    <h1 class="page-title">Probar Producto</h1>
+    <p class="page-subtitle">Agenda una cita para probar hasta 3 productos en nuestra tienda antes de comprar.</p>
+
+    <div class="citas-grid">
+        
+        <!-- COLUMNA IZQUIERDA: FORMULARIO -->
+        <div class="form-card">
+            <h3>Información de la Cita</h3>
+            <p class="form-desc">Completa el formulario para agendar tu cita</p>
+
+            <form action="{{ url_for('main.probar_producto') }}" method="POST">
+                
+                <!-- Nombre -->
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" name="nombre" placeholder="Ej. Juan Pérez" required 
+                           value="{{ nombre_usuario if nombre_usuario else '' }}">
+                </div>
+
+                <!-- Correo -->
+                <div class="form-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" name="email" placeholder="juan@ejemplo.com" required
+                           value="{{ email_usuario if email_usuario else '' }}">
+                </div>
+
+                <!-- Teléfono -->
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" name="telefono" placeholder="+52 55 1234 5678" required>
+                </div>
+
+                <!-- Hora y Fecha (Grid interno) -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Fecha Preferida</label>
+                        <input type="date" name="fecha" required class="input-date">
+                    </div>
+                    <div class="form-group">
+                        <label>Hora Preferida</label>
+                        <select name="hora" required>
+                            <option value="" disabled selected>Selecciona una hora</option>
+                            <option value="10:00">10:00 AM</option>
+                            <option value="11:00">11:00 AM</option>
+                            <option value="12:00">12:00 PM</option>
+                            <option value="13:00">01:00 PM</option>
+                            <option value="14:00">02:00 PM</option>
+                            <option value="15:00">03:00 PM</option>
+                            <option value="16:00">04:00 PM</option>
+                            <option value="17:00">05:00 PM</option>
+                            <option value="18:00">06:00 PM</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Productos -->
+                <div class="form-group">
+                    <label>Productos que deseas Probar</label>
+                    <textarea name="productos" rows="3" placeholder="Ejemplo: iPhone 15 Pro Max, MacBook Air M3... (Máximo 3 productos)"></textarea>
+                    <small>Puedes probar hasta 3 productos por cita</small>
+                </div>
+
+                <!-- Botón -->
+                <button type="submit" class="btn-submit">Agendar Cita</button>
+            </form>
+        </div>
+
+        <!-- COLUMNA DERECHA: INFO EXTRA -->
+        <div class="info-column">
+            
+            <!-- Calendario Visual (Decorativo o funcional con JS luego) -->
+           <div class="info-card calendar-card">
+            <h3><i class="far fa-calendar-alt"></i> Disponibilidad</h3>
+            <div class="fake-calendar">
+                <div class="cal-header">
+                    <button id="prevMonth" type="button">&lt;</button>
+                    <span id="monthYear"></span>
+                    <button id="nextMonth" type="button">&gt;</button>
+                </div>
+                <div class="cal-grid" id="calendarGrid"></div>
+            </div>
+        </div>
+
+            <!-- Cómo funciona -->
+            <div class="info-card steps-card">
+                <h3>¿Cómo Funciona?</h3>
+                <ul class="steps-list">
+                    <li>
+                        <span class="step-num">1</span>
+                        <p>Completa el formulario con tus datos y productos.</p>
+                    </li>
+                    <li>
+                        <span class="step-num">2</span>
+                        <p>Recibirás un correo de confirmación.</p>
+                    </li>
+                    <li>
+                        <span class="step-num">3</span>
+                        <p>Visita nuestra tienda para probar los equipos.</p>
+                    </li>
+                    <li>
+                        <span class="step-num">4</span>
+                        <p>Decide si deseas comprar con seguridad.</p>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Horarios -->
+            <div class="info-card hours-card">
+                <h3><i class="far fa-clock"></i> Horarios de Atención</h3>
+                <div class="hours-row">
+                    <span>Lunes - Viernes</span>
+                    <strong>10:00 AM - 8:00 PM</strong>
+                </div>
+                <div class="hours-row">
+                    <span>Sábado</span>
+                    <strong>10:00 AM - 6:00 PM</strong>
+                </div>
+                <div class="hours-row">
+                    <span>Domingo</span>
+                    <strong>11:00 AM - 5:00 PM</strong>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+const calendarGrid = document.getElementById('calendarGrid');
+const monthYear = document.getElementById('monthYear');
+const prevMonth = document.getElementById('prevMonth');
+const nextMonth = document.getElementById('nextMonth');
+
+let today = new Date();
+let currentMonth = today.getMonth();
+let currentYear = today.getFullYear();
+
+function renderCalendar(month, year) {
+    const days = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'];
+    calendarGrid.innerHTML = '';
+    monthYear.textContent = `${getMonthName(month)} ${year}`;
+    // Header
+    days.forEach(d => {
+        const span = document.createElement('span');
+        span.textContent = d;
+        calendarGrid.appendChild(span);
+    });
+    // First day
+    let firstDay = new Date(year, month, 1).getDay();
+    firstDay = firstDay === 0 ? 6 : firstDay - 1; // Ajuste para lunes
+    // Days in month
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    // Previous month days (muted)
+    for (let i = 0; i < firstDay; i++) {
+        const span = document.createElement('span');
+        span.className = 'muted';
+        span.textContent = '';
+        calendarGrid.appendChild(span);
+    }
+    // Actual days
+    for (let d = 1; d <= daysInMonth; d++) {
+        const span = document.createElement('span');
+        span.textContent = d;
+        if (
+            d === today.getDate() &&
+            month === today.getMonth() &&
+            year === today.getFullYear()
+        ) {
+            span.className = 'active';
+        }
+        span.onclick = function() {
+            document.querySelectorAll('.cal-grid .active').forEach(s => s.classList.remove('active'));
+            span.classList.add('active');
+            // Aquí puedes guardar el día seleccionado en un input oculto si lo necesitas
+        };
+        calendarGrid.appendChild(span);
+    }
+}
+
+function getMonthName(m) {
+    const names = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    return names[m];
+}
+
+prevMonth.onclick = function() {
+    currentMonth--;
+    if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+    }
+    renderCalendar(currentMonth, currentYear);
+};
+
+nextMonth.onclick = function() {
+    currentMonth++;
+    if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+    }
+    renderCalendar(currentMonth, currentYear);
+};
+
+renderCalendar(currentMonth, currentYear);
+</script>
+{% endblock %}

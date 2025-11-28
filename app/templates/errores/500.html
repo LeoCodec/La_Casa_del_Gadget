@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 - Descanso del Sistema</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ESTILOS ROBOT RELAX 500 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: #2c3e50; /* Fondo oscuro elegante */
+            font-family: 'Share Tech Mono', monospace;
+            color: #ecf0f1;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Círculo de luz detrás del robot */
+        .spotlight {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(44,62,80,0) 70%);
+            z-index: 1;
+        }
+
+        .content-box {
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            font-size: 100px;
+            margin: 0;
+            color: #D97752; /* Coral */
+            text-shadow: 4px 4px 0px #1D5A45;
+        }
+
+        h2 { font-size: 2rem; margin-bottom: 20px; }
+        p { font-size: 1.2rem; margin-bottom: 40px; color: #bdc3c7; max-width: 600px; margin-left: auto; margin-right: auto;}
+
+        /* TU ROBOT */
+        .relax-robot {
+            width: 280px; /* Un poco más grande */
+            margin-bottom: 20px;
+            /* Filtro para que brille un poco en el fondo oscuro */
+            drop-shadow(0 0 20px rgba(255, 255, 255, 0.2)); 
+        }
+
+        .btn-retry {
+            display: inline-block;
+            padding: 15px 40px;
+            border: 2px solid #1D5A45;
+            color: #1D5A45;
+            background: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        .btn-retry:hover {
+            background: #1D5A45;
+            color: #fff;
+            box-shadow: 0 0 20px #1D5A45;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="spotlight"></div>
+
+    <div class="content-box">
+        <!-- TU GIF DEL ROBOT -->
+        <img class="relax-robot" src="{{ url_for('static', filename='img/robot_refencias.gif') }}" alt="Robot Feliz">
+
+        <h1>500</h1>
+        <h2>¡Tiempo Fuera!</h2>
+        <p>Nuestros servidores se calentaron, así que nuestro robot aprovechó para tomarse un descanso y bailar un poco. Volvemos en breve.</p>
+        
+        <!-- Enlace a inicio -->
+        <a href="/" class="btn-retry">
+            Despertar al Robot
+        </a>
+    </div>
+
+</body>
+</html>

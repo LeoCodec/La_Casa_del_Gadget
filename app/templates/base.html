@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}La Casa del Gadget{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <!-- Top Bar -->
+    <header class="top-bar">
+        Envío gratis en compras mayores a $1,000 MXN
+    </header>
+
+    <!-- Navbar principal -->
+    <nav class="navbar">
+        <div class="logo">
+            <a href="{{ url_for('main.index') }}">
+                <img src="{{ url_for('static', filename='img/logos/logo_principal.png') }}" alt="La Casa del Gadget" style="height: 50px;">
+            </a>
+        </div>
+        <div class="search-container">
+            <div class="search-bar">
+                <input type="text" placeholder="Buscar productos...">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li>
+                <a href="{{ url_for('main.probar_producto') }}" class="btn-nav btn-primary">
+                    <i class="fas fa-laptop"></i> Probar
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('main.empleados') }}" class="btn-nav btn-secondary">
+                    <i class="fas fa-user-tie"></i> Staff
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('main.login') }}" class="icon-link" title="Iniciar Sesión">
+                    <i class="fas fa-user"></i>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('main.carrito') }}" class="icon-link" title="Ver Carrito">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count">2</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Barra de Categorías (separada y debajo del navbar) -->
+    <div class="category-nav" style="background-color: var(--crema); padding: 10px 5%; border-bottom: 1px solid #ddd;">
+        <ul style="display: flex; gap: 30px; list-style: none; font-weight: 600; color: #444; overflow-x: auto;">
+            <li><a href="{{ url_for('main.productos_categoria', categoria='telefonos') }}" style="text-decoration: none; color: inherit;">Teléfonos</a></li>
+            <li><a href="{{ url_for('main.productos_categoria', categoria='tablets') }}" style="text-decoration: none; color: inherit;">Tablets</a></li>
+            <li><a href="{{ url_for('main.productos_categoria', categoria='laptops') }}" style="text-decoration: none; color: inherit;">Laptops</a></li>
+            <li><a href="{{ url_for('main.productos_categoria', categoria='wearables') }}" style="text-decoration: none; color: inherit;">Wearables</a></li>
+            <li><a href="{{ url_for('main.productos_categoria', categoria='accesorios') }}" style="text-decoration: none; color: inherit;">Accesorios</a></li>
+        </ul>
+    </div>
+
+    {% block content %}
+    <!-- Aquí va el contenido específico de cada página -->
+    {% endblock %}
+    <footer class="footer">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px;">
+            <div class="footer-section" style="flex: 1; min-width: 250px;">
+                <h3>La Casa del Gadget</h3>
+                <p>Tu tienda de confianza para tecnología de calidad. Prueba antes de comprar.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Categorías</h4>
+                <ul>
+                    <li>Teléfonos</li>
+                    <li>Tablets</li>
+                    <li>Laptops</li>
+                    <li>Wearables</li>
+                    <li>Accesorios</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Ayuda</h4>
+                <ul>
+                    <li><a href="{{ url_for('main.probar_producto') }}">Probar Producto</a></li>
+                    <li>Envíos y Devoluciones</li>
+                    <li>Garantías</li>
+                    <li>Preguntas Frecuentes</li>
+                    <li>Términos y Condiciones</li>
+                    <li>Contacto</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contacto</h4>
+                <p>Av. Principal 123, Ciudad de México</p>
+                <p>+52 55 1234 5678</p>
+                <p>contacto@lacasadelgadget.com</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2025 La Casa del Gadget. Todos los derechos reservados.
+        </div>
+    </footer>
+</body>
+</html>
