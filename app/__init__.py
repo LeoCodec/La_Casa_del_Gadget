@@ -5,6 +5,10 @@ import os
 def create_app():
     app = Flask(__name__)
 
+    # --- ESTA LÍNEA ES LA QUE TE FALTABA PARA QUE EL LOGIN FUNCIONE ---
+    app.secret_key = "clave_super_secreta_para_la_session" 
+    # ------------------------------------------------------------------
+
     # Ruta a la base de datos
     db_path = os.path.join(os.getcwd(), "database", "la_casa.db")
 
