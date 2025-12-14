@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Punto de Venta - La Casa del Gadget</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .pos-container { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        
+        .scanner-section { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .cart-section { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 80vh; }
+
+        .scanner-box {
+            display: flex; gap: 10px; margin-bottom: 20px;
+            background: var(--verde); padding: 20px; border-radius: 10px; align-items: center;
+        }
+        .scanner-input {
+            flex: 1; padding: 15px; font-size: 1.5rem; border: none; border-radius: 5px; text-align: center;
+            outline: none; font-weight: bold; letter-spacing: 2px;
+        }
+        .btn-camera {
+            background: var(--coral); color: white; border: none; padding: 15px 20px; 
+            border-radius: 8px; cursor: pointer; font-size: 1.2rem; transition: 0.3s;
+        }
+        .btn-camera:hover { transform: scale(1.05); }
+
+        .product-list { flex: 1; overflow-y: auto; margin-bottom: 20px; }
+        .cart-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px; border-bottom: 1px solid #eee; animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        
+        .cart-item img { width: 50px; height: 50px; object-fit: contain; border-radius: 5px; background: #f9f9f9; }
+        .item-info { flex: 1; margin-left: 15px; }
+        .item-info h4 { margin: 0; font-size: 1rem; color: var(--negro); }
+        .item-info span { font-size: 0.85rem; color: #666; }
+        .item-total { font-weight: bold; color: var(--verde); font-size: 1.1rem; }
+
+        .total-box { 
+            background: var(--gris-claro); padding: 20px; border-radius: 10px; text-align: center; 
+            margin-top: auto; border: 2px solid var(--verde);
+        }
+        .total-amount { font-size: 2.5rem; font-weight: 800; color: var(--verde); display: block; }
+
+        /* SIMULADOR DE CÁMARA (MODAL) */
+        #cameraModal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; flex-direction: column;
+        }
+        .camera-view {
+            width: 300px; height: 300px; border: 5px solid var(--verde); border-radius: 20px;
+            position: relative; overflow: hidden; background: #222;
+            box-shadow: 0 0 50px rgba(29, 90, 69, 0.5);
+        }
+        .scan-line {
+            width: 100%; height: 2px; background: red; position: absolute; top: 0;
+            animation: scan 2s infinite linear; box-shadow: 0 0 10px red;
+        }
+        @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
+        .camera-text { color: white; margin-top: 20px; font-family: monospace; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+    
+    <div class="sidebar">
+        <h2>Gadget POS</h2>
+        <ul>
+            <li><a href="{{ url_for('main.admin_dashboard') }}"><i class="fas fa-arrow-left"></i> Salir</a></li>
+            <li><a href="#" class="active"><i class="fas fa-cash-register"></i> Caja</a></li>
+        </ul>
+        <div style="margin-top:auto; padding:20px; color:rgba(255,255,255,0.7); font-size:0.8rem;">
+            Cajero: <br><strong>{{ session.get('username') }}</strong>
+        </div>
+    </div>
+
+    <div class="main-content">
+        
+        <div class="pos-container">
+            <!-- COLUMNA IZQUIERDA: ESCÁNER Y ÚLTIMO PRODUCTO -->
+            <div class="scanner-section">
+                <header class="header-admin" style="margin-bottom:20px;">
+                    <h1><i class="fas fa-barcode"></i> Punto de Venta</h1>
+                    <span class="date-display">{{ session.get('nombre_completo') }}</span>
+                </header>
+
+                <!-- CAJA DE ESCÁNER -->
+                <div class="scanner-box">
+                    <form method="POST" id="scanForm" style="flex:1; display:flex;">
+                        <input type="text" id="barcodeInput" name="codigo_barras" class="scanner-input" 
+                               placeholder="Escanea aquí..." autofocus autocomplete="off">
+                    </form>
+                    <button class="btn-camera" onclick="startCameraSimulation()">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                </div>
+
+                <!-- Mensajes -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div style="padding:15px; border-radius:8px; margin-bottom:20px; 
+                                        background: {{ '#d4edda' if category=='success' else '#f8d7da' }}; 
+                                        color: {{ '#155724' if category=='success' else '#721c24' }};">
+                                <i class="fas {{ 'fa-check-circle' if category=='success' else 'fa-exclamation-circle' }}"></i> 
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <div style="text-align:center; color:#888; margin-top:50px;">
+                    <i class="fas fa-box-open fa-5x" style="opacity:0.2;"></i>
+                    <p style="margin-top:20px;">Listo para escanear productos</p>
+                    <small>Usa el teclado o el botón de cámara</small>
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA: TICKET Y TOTAL -->
+            <div class="cart-section">
+                <h3 style="border-bottom:2px solid var(--verde); padding-bottom:10px; margin-bottom:15px;">
+                    Ticket de Venta #0045
+                </h3>
+
+                <div class="product-list" id="ticketList">
+                    {% for item in venta %}
+                    <div class="cart-item">
+                        <img src="{{ item.url_imagen }}" alt="img">
+                        <div class="item-info">
+                            <h4>{{ item.nombre }}</h4>
+                            <span>{{ item.cantidad }} x ${{ "{:,.0f}".format(item.precio) }}</span>
+                        </div>
+                        <div class="item-total">
+                            ${{ "{:,.0f}".format(item.precio * item.cantidad) }}
+                        </div>
+                        <form method="POST" style="margin-left:10px;">
+                            <input type="hidden" name="accion" value="eliminar_item">
+                            <input type="hidden" name="item_id" value="{{ item.id }}">
+                            <button type="submit" style="background:none; border:none; color:#ccc; cursor:pointer;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <p style="text-align:center; color:#999; margin-top:20px;">Carrito vacío</p>
+                    {% endfor %}
+                </div>
+
+                <div class="total-box">
+                    <span>Total a Pagar</span>
+                    <span class="total-amount">${{ "{:,.2f}".format(total) }}</span>
+                    
+                    <div style="display:flex; gap:10px; margin-top:20px;">
+                        <form method="POST" style="flex:1;">
+                            <button type="submit" name="accion" value="limpiar" class="btn-action btn-delete" style="width:100%; padding:15px;">
+                                Cancelar
+                            </button>
+                        </form>
+                        <form method="POST" style="flex:2;">
+                            <button type="submit" name="accion" value="finalizar" class="btn-action btn-add" style="width:100%; padding:15px; font-size:1.1rem;">
+                                Cobrar <i class="fas fa-print"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL DE SIMULACIÓN DE CÁMARA -->
+    <div id="cameraModal">
+        <div class="camera-view">
+            <div class="scan-line"></div>
+            <!-- IMAGEN DE FONDO SIMULANDO CÁMARA -->
+            <img src="https://media.istockphoto.com/id/1133596483/es/foto/c%C3%B3digo-qr-de-escaneo-manual-de-la-mujer-con-tel%C3%A9fono-inteligente.jpg?s=612x612&w=0&k=20&c=K_YdO_XFh-XgqY9_XkQc_XqXqXqXqXqXqXqXqXqXqXqX" 
+                 style="width:100%; height:100%; object-fit:cover; opacity:0.6;">
+        </div>
+        <div class="camera-text">Escaneando...</div>
+    </div>
+
+    <script>
+        // PASO 1: Obtener la lista de productos del Backend (Jinja2 -> JS)
+        // Esto permite que el JS sepa qué IDs existen para elegir uno al azar
+        const productosDisponibles = {{ productos_disponibles | tojson }};
+        
+        function startCameraSimulation() {
+            const modal = document.getElementById('cameraModal');
+            const input = document.getElementById('barcodeInput');
+            const form = document.getElementById('scanForm');
+
+            // 1. Mostrar Modal
+            modal.style.display = 'flex';
+
+            // 2. Esperar 2 segundos (Simulando lectura)
+            setTimeout(() => {
+                // 3. Elegir un producto al azar
+                if (productosDisponibles.length > 0) {
+                    const randomProd = productosDisponibles[Math.floor(Math.random() * productosDisponibles.length)];
+                    
+                    // 4. Escribir el ID en el input
+                    input.value = randomProd.id;
+                    
+                    // 5. Reproducir sonido "Beep" (Opcional, simulado visualmente aquí)
+                    modal.style.display = 'none';
+                    
+                    // 6. Enviar formulario automáticamente
+                    form.submit();
+                } else {
+                    alert("No hay productos cargados en el sistema.");
+                    modal.style.display = 'none';
+                }
+            }, 2000);
+        }
+
+        // Mantener el foco en el input siempre (Como un POS real)
+        document.getElementById('barcodeInput').focus();
+        document.addEventListener('click', function() {
+            document.getElementById('barcodeInput').focus();
+        });
+    </script>
+
+</body>
+</html>

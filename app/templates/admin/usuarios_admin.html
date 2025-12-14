@@ -2,16 +2,25 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administración de Usuarios</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Usuarios Staff - Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Administración de Usuarios</h1>
-        </header>
+    
+    <div class="sidebar">
+        <h2>Gadget Admin</h2>
+        <ul>
+            <li><a href="{{ url_for('main.admin_dashboard') }}"><i class="fas fa-home"></i> Resumen</a></li>
+            <li><a href="{{ url_for('main.admin_productos') }}"><i class="fas fa-box"></i> Inventario</a></li>
+            <li><a href="{{ url_for('main.admin_usuarios') }}" class="active"><i class="fas fa-users"></i> Usuarios Staff</a></li>
+            <li><a href="{{ url_for('main.logout') }}" class="logout"><i class="fas fa-sign-out-alt"></i> Salir</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
         
+<<<<<<< HEAD
         <main>
             <section class="usuarios-section">
                 <h2>Lista de Usuarios</h2>
@@ -31,6 +40,77 @@
                 </table>
             </section>
         </main>
+=======
+        <!-- Mensajes Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert {{ category }}" style="padding: 10px; margin-bottom: 20px; background: #fff; border-left: 4px solid var(--verde);">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="header-admin">
+            <h1>Gestión de Usuarios (Staff)</h1>
+        </div>
+
+        <!-- Formulario de Registro -->
+        <section class="form-section" style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <h3 style="color: var(--verde); margin-bottom: 15px;">Registrar Nuevo Empleado</h3>
+            <form method="POST" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <input type="text" name="nuevo_usuario" placeholder="Usuario" required style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; flex: 1;">
+                <input type="password" name="nuevo_password" placeholder="Contraseña" required style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; flex: 1;">
+                <select name="nuevo_rol" required style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; min-width: 150px;">
+                    <option value="" disabled selected>Seleccionar Rol</option>
+                    <option value="admin">Admin</option>
+                    <option value="gerente">Gerente</option>
+                    <option value="cajero">Cajero</option>
+                </select>
+                <button type="submit" class="btn-add">Crear Usuario</button>
+            </form>
+        </section>
+
+        <!-- Tabla de Usuarios -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Rol</th>
+                        <th>Fecha Creación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in usuarios %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td><strong>{{ user.username }}</strong></td>
+                        <td>
+                            {% if user.rol == 'admin' %}
+                                <span style="background:var(--coral); color:white; padding:4px 10px; border-radius:12px; font-size:0.8rem;">Admin</span>
+                            {% else %}
+                                <span style="background:#eee; padding:4px 10px; border-radius:12px; font-size:0.8rem; color: #555;">{{ user.rol|capitalize }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user.creado_en }}</td>
+                        <td>
+                            <a href="#" class="btn-action btn-edit"><i class="fas fa-edit"></i></a>
+                            <a href="#" class="btn-action btn-delete"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align:center;">No hay usuarios registrados (¿Ejecutaste crear_empleado.db.py?)</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+>>>>>>> 9591bbecf20d128bc6887a4894eea5ff5fe7a54a
     </div>
 </body>
 </html>

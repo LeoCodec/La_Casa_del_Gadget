@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventario - Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    
+    <div class="sidebar">
+        <h2>Gadget Admin</h2>
+        <ul>
+            <li><a href="{{ url_for('main.admin_dashboard') }}"><i class="fas fa-home"></i> Resumen</a></li>
+            <li><a href="{{ url_for('main.admin_productos') }}" class="active"><i class="fas fa-box"></i> Inventario</a></li>
+            
+            {% if session.get('user_rol') == 'admin' %}
+            <li><a href="{{ url_for('main.admin_usuarios') }}"><i class="fas fa-users"></i> Usuarios Staff</a></li>
+            {% endif %}
+            
+            <li><a href="{{ url_for('main.logout') }}" class="logout"><i class="fas fa-sign-out-alt"></i> Salir</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="header-admin">
+            <h1>Inventario de Productos</h1>
+            <a href="#" class="btn-add"><i class="fas fa-plus"></i> Agregar Producto</a>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Producto</th>
+                        <th>Categoría</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prod in productos %}
+                    <tr>
+                        <td><img src="{{ prod.url_imagen }}" alt="img" style="width:40px; height:40px; object-fit:contain;"></td>
+                        <td>{{ prod.nombre }}</td>
+                        <td>{{ prod.categoria }}</td>
+                        <td>${{ "{:,.0f}".format(prod.precio) }}</td>
+                        <!-- CORRECCIÓN AQUÍ: Usamos notación segura o de diccionario si es necesario -->
+                        <td style="color: {{ 'var(--coral)' if prod['stock'] < 5 else 'var(--verde)' }}; font-weight:bold;">
+                            {{ prod['stock'] }}
+                        </td>
+                        <td>
+                            <a href="#" class="btn-action btn-edit"><i class="fas fa-pen"></i></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
