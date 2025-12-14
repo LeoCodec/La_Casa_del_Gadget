@@ -43,24 +43,49 @@
                 </a>
             </li>
             <li>
-                <a href="{{ url_for('main.carrito') }}" class="icon-link" title="Ver Carrito">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-count">2</span>
+                <a class="icon-link" href="{{ url_for('main.carrito') }}">
+                <i class="fas fa-shopping-cart"></i>
+                {% if cart_count and cart_count > 0 %}
+                    <span class="cart-count">{{ cart_count }}</span>
+                {% endif %}
                 </a>
             </li>
         </ul>
     </nav>
 
     <!-- Barra de Categorías (separada y debajo del navbar) -->
-    <div class="category-nav" style="background-color: var(--crema); padding: 10px 5%; border-bottom: 1px solid #ddd;">
-        <ul style="display: flex; gap: 30px; list-style: none; font-weight: 600; color: #444; overflow-x: auto;">
-            <li><a href="{{ url_for('main.productos_categoria', categoria='telefonos') }}" style="text-decoration: none; color: inherit;">Teléfonos</a></li>
-            <li><a href="{{ url_for('main.productos_categoria', categoria='tablets') }}" style="text-decoration: none; color: inherit;">Tablets</a></li>
-            <li><a href="{{ url_for('main.productos_categoria', categoria='laptops') }}" style="text-decoration: none; color: inherit;">Laptops</a></li>
-            <li><a href="{{ url_for('main.productos_categoria', categoria='wearables') }}" style="text-decoration: none; color: inherit;">Wearables</a></li>
-            <li><a href="{{ url_for('main.productos_categoria', categoria='accesorios') }}" style="text-decoration: none; color: inherit;">Accesorios</a></li>
-        </ul>
-    </div>
+    <ul class="category-bar">
+    <li>
+    <a href="{{ url_for('main.productos_listado', categoria='telefonos') }}"
+        style="text-decoration: none; color: inherit;">
+        Teléfonos
+    </a>
+    </li>
+    <li>
+    <a href="{{ url_for('main.productos_listado', categoria='tablets') }}"
+        style="text-decoration: none; color: inherit;">
+        Tablets
+    </a>
+    </li>
+    <li>
+    <a href="{{ url_for('main.productos_listado', categoria='laptops') }}"
+        style="text-decoration: none; color: inherit;">
+        Laptops
+    </a>
+    </li>
+    <li>
+    <a href="{{ url_for('main.productos_listado', categoria='wearables') }}"
+        style="text-decoration: none; color: inherit;">
+        Wearables
+    </a>
+    </li>
+    <li>
+    <a href="{{ url_for('main.productos_listado', categoria='accesorios') }}"
+        style="text-decoration: none; color: inherit;">
+        Accesorios
+    </a>
+    </li>
+    </ul>
 
     {% block content %}
     <!-- Aquí va el contenido específico de cada página -->

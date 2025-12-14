@@ -1,65 +1,88 @@
 {% extends 'base.html' %}
-
 {% block title %}Carrito - La Casa del Gadget{% endblock %}
 
 {% block content %}
-<div class="container-citas" style="max-width:900px;">
-    <h1 style="margin-bottom:30px;">Carrito de Compras</h1>
-    {% if carrito and carrito|length > 0 %}
-        {% for item in carrito %}
-        <div class="product-card" style="margin-bottom:20px;">
-            <div style="display:flex;align-items:center;gap:20px;">
-                <div class="img-container" style="width:120px;height:120px;">
-                    <img src="{{ item.url_imagen }}" alt="{{ item.nombre }}">
-                </div>
-                <div style="flex:1;">
-                    <span style="color:#888;font-size:0.9rem;">{{ item.marca }}</span>
-                    <h3 style="margin:5px 0;">{{ item.nombre }}</h3>
-                    <div style="display:flex;align-items:center;gap:10px;">
-                        <form method="POST" action="{{ url_for('main.actualizar_carrito', producto_id=item.id) }}">
-                            <button type="submit" name="accion" value="restar" class="btn-nav" style="width:32px;">-</button>
-                            <span>{{ item.cantidad }}</span>
-                            <button type="submit" name="accion" value="sumar" class="btn-nav" style="width:32px;">+</button>
-                        </form>
-                        <form method="POST" action="{{ url_for('main.eliminar_carrito', producto_id=item.id) }}" style="display:inline;">
-                            <button type="submit" class="icon-link" title="Eliminar" style="color:#D97752;"><i class="fas fa-trash"></i></button>
-                        </form>
-                    </div>
-                </div>
-                <div style="font-size:1.3rem;font-weight:bold;color:var(--verde);margin-left:20px;">
-                    ${{ "{:,.0f}".format(item.precio * item.cantidad) }}
-                </div>
-            </div>
-        </div>
-        {% endfor %}
+<div class="cart-page">
+  <div class="cart-header">
+    <h1>Carrito de Compras</h1>
+    <a class="cart-continue-link" href="{{ url_for('main.productos_listado') }}">Seguir comprando</a>
+  </div>
 
-        <!-- Resumen del Pedido -->
-        <div class="form-card" style="margin-top:30px;">
-            <h2 style="margin-bottom:20px;">Resumen del Pedido</h2>
-            <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
-                <span>Subtotal</span>
-                <span>${{ "{:,.0f}".format(subtotal) }}</span>
+  {% if carrito and carrito|length > 0 %}
+    <div class="cart-grid">
+
+      <!-- Lista -->
+      <section class="cart-list">
+        {% for item in carrito %}
+        <article class="cart-item">
+          <div class="cart-item-img">
+            <img src="{{ item.url_imagen }}" alt="{{ item.nombre }}">
+          </div>
+
+          <div class="cart-item-info">
+            <div class="cart-item-brand">{{ item.marca }}</div>
+            <div class="cart-item-name">{{ item.nombre }}</div>
+
+            <div class="cart-item-actions">
+              <form class="cart-qty" method="POST" action="{{ url_for('main.actualizar_carrito', producto_id=item.id) }}">
+                <button type="submit" name="accion" value="restar" class="cart-qty-btn" aria-label="Restar">−</button>
+                <span class="cart-qty-val">{{ item.cantidad }}</span>
+                <button type="submit" name="accion" value="sumar" class="cart-qty-btn" aria-label="Sumar">+</button>
+              </form>
+
+              <form method="POST" action="{{ url_for('main.eliminar_carrito', producto_id=item.id) }}">
+                <button type="submit" class="cart-remove" title="Eliminar">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
             </div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
-                <span>Envío</span>
-                <span style="color:var(--verde);font-weight:bold;">Gratis</span>
-            </div>
-            <hr>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin:20px 0;">
-                <span style="font-size:1.2rem;font-weight:bold;">Total</span>
-                <span style="font-size:1.3rem;font-weight:bold;color:var(--verde);">${{ "{:,.0f}".format(total) }}</span>
-            </div>
-            <form method="POST" action="{{ url_for('main.pagar') }}">
-                <button type="submit" class="btn-submit">Proceder al Pago</button>
-            </form>
-            <a href="{{ url_for('main.index') }}" class="btn-nav btn-secondary" style="width:100%;margin-top:15px;">Continuar Comprando</a>
+          </div>
+
+          <div class="cart-item-total">
+            ${{ "{:,.0f}".format(item.precio * item.cantidad) }}
+          </div>
+        </article>
+        {% endfor %}
+      </section>
+
+      <!-- Resumen -->
+      <aside class="cart-summary">
+        <h2>Resumen del Pedido</h2>
+
+        <div class="cart-line">
+          <span>Subtotal</span>
+          <span>${{ "{:,.0f}".format(subtotal) }}</span>
         </div>
-    {% else %}
-        <div class="form-card" style="text-align:center;">
-            <h2>Tu carrito está vacío</h2>
-            <p>Agrega productos para verlos aquí.</p>
-            <a href="{{ url_for('main.index') }}" class="btn-submit" style="margin-top:20px;">Ir a la tienda</a>
+
+        <div class="cart-line">
+          <span>Envío</span>
+          <span class="cart-free">Gratis</span>
         </div>
-    {% endif %}
+
+        <hr class="cart-hr">
+
+        <div class="cart-total">
+          <span>Total</span>
+          <span>${{ "{:,.0f}".format(total) }}</span>
+        </div>
+
+        <form method="POST" action="{{ url_for('main.pagar') }}">
+          <button type="submit" class="btn-submit">Proceder al Pago</button>
+        </form>
+
+        <a href="{{ url_for('main.productos_listado') }}" class="btn-nav btn-secondary cart-secondary">
+          Continuar Comprando
+        </a>
+      </aside>
+
+    </div>
+
+  {% else %}
+    <div class="cart-empty">
+      <h2>Tu carrito está vacío</h2>
+      <p>Agrega productos para verlos aquí.</p>
+      <a href="{{ url_for('main.productos_listado') }}" class="btn-submit">Ir a la tienda</a>
+    </div>
+  {% endif %}
 </div>
 {% endblock %}

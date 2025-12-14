@@ -175,7 +175,7 @@ function renderCalendar(month, year) {
             span.className = 'active';
         }
         span.onclick = function() {
-            document.querySelectorAll('.cal-grid .active').forEach(s => s.classList.remove('active'));
+            calendarGrid.querySelectorAll('span.active').forEach(s => s.classList.remove('active'));
             span.classList.add('active');
             // Aquí puedes guardar el día seleccionado en un input oculto si lo necesitas
         };
