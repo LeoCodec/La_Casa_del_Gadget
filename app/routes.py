@@ -102,6 +102,71 @@ def get_producto_basico(producto_id: int):
     row = cur.fetchone()
     conn.close()
     return dict(row) if row else None
+# =========================================================
+# INVENTARIO ACCIONES
+# =========================================================
+@main.route("/admin/productos/nuevo", methods=["GET", "POST"])
+def admin_producto_nuevo():
+    if request.method == "POST":
+        nombre = request.form["nombre"]
+        marca = request.form["marca"]
+        tipo = request.form["tipo"]
+        precio = float(request.form["precio"])
+        stock = int(request.form["stock"])
+        imagen = request.form["url_imagen"]
+
+        conn = get_conn()
+        cur = conn.cursor()
+
+        cur.execute("""
+            INSERT INTO productos (nombre, marca, tipo, precio, url_imagen, disponible)
+            VALUES (?, ?, ?, ?, ?, 1)
+        """, (nombre, marca, tipo, precio, imagen))
+
+        producto_id = cur.lastrowid
+
+        cur.execute("""
+            INSERT INTO inventario (producto_id, stock)
+            VALUES (?, ?)
+        """, (producto_id, stock))
+
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for("main.admin_productos"))
+
+    return render_template("admin/producto_form.html", modo="nuevo")
+@main.route("/admin/productos/editar/<int:producto_id>", methods=["GET", "POST"])
+def admin_producto_editar(producto_id):
+    conn = get_conn()
+    cur = conn.cursor()
+
+    if request.method == "POST":
+        cur.execute("""
+            UPDATE productos
+            SET nombre=?, marca=?, tipo=?, precio=?, url_imagen=?
+            WHERE id=?
+        """, (
+            request.form["nombre"],
+            request.form["marca"],
+            request.form["tipo"],
+            request.form["precio"],
+            request.form["url_imagen"],
+            producto_id
+        ))
+        conn.commit()
+        conn.close()
+        return redirect(url_for("main.admin_productos"))
+
+    cur.execute("""
+        SELECT * FROM productos WHERE id=?
+    """, (producto_id,))
+    producto = cur.fetchone()
+    conn.close()
+
+    return render_template("admin/producto_form.html",
+                           modo="editar",
+                           producto=producto)
 
 
 # =========================================================
@@ -574,5 +639,26 @@ def admin_productos():
     if "user_id" not in session or session.get("tipo_usuario") != "staff":
         return redirect(url_for("main.admin_login"))
 
-    productos = fetch_all_products(limit=None)
-    return render_template("admin/productos_admin.html", productos=productos, cart_count=get_cart_count())
+    conn = get_conn()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT
+            p.id,
+            p.nombre,
+            p.marca,
+            p.tipo,
+            p.precio,
+            p.url_imagen,
+            p.disponible,
+            COALESCE(SUM(i.stock), 0) AS stock
+        FROM productos p
+        LEFT JOIN inventario i ON i.producto_id = p.id
+        GROUP BY p.id
+        ORDER BY p.id ASC
+    """)
+
+    productos = [dict(r) for r in cur.fetchall()]
+    conn.close()
+
+    return render_template("admin/productos_admin.html", productos=productos)

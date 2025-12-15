@@ -19,28 +19,11 @@
     </div>
 
     <div class="main-content">
-        
-<<<<<<< HEAD
+    
         <main>
-            <section class="usuarios-section">
-                <h2>Lista de Usuarios</h2>
-                <table class="usuarios-table">
-                    <thead> 
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Email</th>
-                            <th>Rol</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Los usuarios irán aquí -->
-                    </tbody>
-                </table>
-            </section>
+
         </main>
-=======
+
         <!-- Mensajes Flash -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -73,6 +56,10 @@
         </section>
 
         <!-- Tabla de Usuarios -->
+        <section class="usuarios-section">
+                <h2>Lista de Usuarios</h2>
+                
+   
         <div class="table-container">
             <table>
                 <thead>
@@ -110,7 +97,7 @@
                 </tbody>
             </table>
         </div>
->>>>>>> 9591bbecf20d128bc6887a4894eea5ff5fe7a54a
+    </section>
     </div>
 </body>
 </html>

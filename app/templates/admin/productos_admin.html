@@ -1,64 +1,136 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Inventario - Admin</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario - Admin</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+
 <body>
-    
-    <div class="sidebar">
-        <h2>Gadget Admin</h2>
-        <ul>
-            <li><a href="{{ url_for('main.admin_dashboard') }}"><i class="fas fa-home"></i> Resumen</a></li>
-            <li><a href="{{ url_for('main.admin_productos') }}" class="active"><i class="fas fa-box"></i> Inventario</a></li>
-            
-            {% if session.get('user_rol') == 'admin' %}
-            <li><a href="{{ url_for('main.admin_usuarios') }}"><i class="fas fa-users"></i> Usuarios Staff</a></li>
-            {% endif %}
-            
-            <li><a href="{{ url_for('main.logout') }}" class="logout"><i class="fas fa-sign-out-alt"></i> Salir</a></li>
-        </ul>
+
+  <div class="sidebar">
+    <h2>Gadget Admin</h2>
+    <ul>
+      <li><a href="{{ url_for('main.admin_dashboard') }}"><i class="fas fa-home"></i> Resumen</a></li>
+      <li><a href="{{ url_for('main.admin_productos') }}" class="active"><i class="fas fa-box"></i> Inventario</a></li>
+
+      {% if session.get('user_rol') == 'admin' %}
+        <li><a href="{{ url_for('main.admin_usuarios') }}"><i class="fas fa-users"></i> Usuarios Staff</a></li>
+      {% endif %}
+
+      <li><a href="{{ url_for('main.logout') }}" class="logout"><i class="fas fa-sign-out-alt"></i> Salir</a></li>
+    </ul>
+  </div>
+
+  <div class="main-content">
+
+    <div class="header-admin">
+      <div>
+        <h1>Inventario de Productos</h1>
+        <p style="margin-top:6px; color:#6b7280;">
+          Total: <strong>{{ productos|length }}</strong> productos
+        </p>
+      </div>
+
+      <!-- (Opcional) luego lo conectas a un modal/ruta -->
+      <a href="#" class="btn-add"><i class="fas fa-plus"></i> Agregar Producto</a>
     </div>
 
-    <div class="main-content">
-        <div class="header-admin">
-            <h1>Inventario de Productos</h1>
-            <a href="#" class="btn-add"><i class="fas fa-plus"></i> Agregar Producto</a>
-        </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Imagen</th>
+            <th>Producto</th>
+            <th>Marca</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Disponible</th>
+            <th style="width:120px;">Acciones</th>
+          </tr>
+        </thead>
 
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Imagen</th>
-                        <th>Producto</th>
-                        <th>Categoría</th>
-                        <th>Precio</th>
-                        <th>Stock</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for prod in productos %}
-                    <tr>
-                        <td><img src="{{ prod.url_imagen }}" alt="img" style="width:40px; height:40px; object-fit:contain;"></td>
-                        <td>{{ prod.nombre }}</td>
-                        <td>{{ prod.categoria }}</td>
-                        <td>${{ "{:,.0f}".format(prod.precio) }}</td>
-                        <!-- CORRECCIÓN AQUÍ: Usamos notación segura o de diccionario si es necesario -->
-                        <td style="color: {{ 'var(--coral)' if prod['stock'] < 5 else 'var(--verde)' }}; font-weight:bold;">
-                            {{ prod['stock'] }}
-                        </td>
-                        <td>
-                            <a href="#" class="btn-action btn-edit"><i class="fas fa-pen"></i></a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        <tbody>
+          {% for prod in productos %}
+            {% set stock = prod.get('stock', 0) %}
+            {% set disponible = prod.get('disponible', 1) %}
+            {% set img = prod.get('url_imagen', '') %}
+
+            <tr>
+              <td>
+                <div style="width:44px;height:44px;border-radius:10px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                  {% if img %}
+                    {# Si ya viene como URL absoluta #}
+                    {% if img.startswith('http') %}
+                      <img src="{{ img }}" alt="img" style="width:100%;height:100%;object-fit:contain;">
+                    {% else %}
+                      {# Si guardas ruta tipo "img/productos/iphone15.jpg" #}
+                      <img src="{{ url_for('static', filename=img) }}" alt="img" style="width:100%;height:100%;object-fit:contain;">
+                    {% endif %}
+                  {% else %}
+                    <i class="fas fa-image" style="color:#9ca3af;"></i>
+                  {% endif %}
+                </div>
+              </td>
+
+              <td>
+                <div style="font-weight:800; color:#111827;">{{ prod.get('nombre','(sin nombre)') }}</div>
+                <div style="font-size:.85rem; color:#6b7280;">ID: {{ prod.get('id','-') }}</div>
+              </td>
+
+              <td>{{ prod.get('marca','-') }}</td>
+              <td>{{ prod.get('tipo','-') }}</td>
+
+              <td style="font-weight:800;">
+                ${{ "{:,.0f}".format((prod.get('precio', 0) or 0)) }}
+              </td>
+
+              <td style="font-weight:900; color: {{ '#D97752' if stock < 5 else '#1D5A45' }};">
+                {{ stock }}
+                {% if stock < 5 %}
+                  <span style="margin-left:8px; font-size:.75rem; padding:3px 8px; border-radius:999px; background:rgba(217,119,82,.15); color:#D97752; font-weight:800;">
+                    Stock bajo
+                  </span>
+                {% endif %}
+              </td>
+
+              <td>
+                {% if disponible == 1 %}
+                  <span style="font-size:.8rem; padding:4px 10px; border-radius:999px; background:rgba(29,90,69,.12); color:#1D5A45; font-weight:900;">
+                    Sí
+                  </span>
+                {% else %}
+                  <span style="font-size:.8rem; padding:4px 10px; border-radius:999px; background:rgba(0,0,0,.08); color:#374151; font-weight:900;">
+                    No
+                  </span>
+                {% endif %}
+              </td>
+
+              <td>
+                <!-- Deja acciones listas para conectar -->
+                <a href="#" class="btn-action btn-edit" title="Editar">
+                  <i class="fas fa-pen"></i>
+                </a>
+
+                <a href="#" class="btn-action" title="Ajustar Stock" style="background:rgba(29,90,69,.10); color:#1D5A45;">
+                  <i class="fas fa-warehouse"></i>
+                </a>
+
+                <a href="#" class="btn-action" title="Activar/Desactivar" style="background:rgba(0,0,0,.06); color:#111827;">
+                  <i class="fas fa-toggle-on"></i>
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
     </div>
+
+  </div>
+
 </body>
 </html>

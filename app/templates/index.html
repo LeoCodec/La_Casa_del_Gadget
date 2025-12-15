@@ -28,9 +28,10 @@
 <!-- ============================================= -->
 <!-- CATEGORÍAS (TARJETAS CLICABLES)               -->
 <!-- ============================================= -->
-<h2 class="exp">Explora por Categoría</h2>
+ <section class="featured-products">
+<h2 class="product-main">Explora por Categoría</h2>
 
-<section class="category-cards">
+<div class="category-cards">
   <div class="categories-grid">
     <!-- OJO: tu /productos usa checkboxes (getlist), así que para filtrar por categoría en link lo correcto es ?categoria= -->
     <a href="{{ url_for('main.productos_listado') }}?categoria=telefonos" class="category-card">
@@ -53,6 +54,7 @@
       <i class="fas fa-headphones"></i> Accesorios
     </a>
   </div>
+</div>
 </section>
 
 <!-- ========================================= -->

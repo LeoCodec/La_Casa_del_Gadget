@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Punto de Venta - La Casa del Gadget{% endblock %}
+
+{% block content %}
+<div class="pos-wrap">
+
+  <header class="pos-header">
+    <div class="pos-title">
+      <h1>Punto de Venta</h1>
+      <p class="pos-subtitle">
+        Escanea un producto (simulado con ID) o agréguelo manualmente. Finaliza o limpia la venta cuando termines.
+      </p>
+    </div>
+
+    <div class="pos-meta">
+      <div class="pos-pill">
+        <span class="muted">Usuario</span>
+        <strong>{{ session.get('nombre_completo', session.get('username', 'Staff')) }}</strong>
+      </div>
+      <div class="pos-pill">
+        <span class="muted">Fecha</span>
+        <strong>{{ session.get('fecha_hoy', '') }}</strong>
+      </div>
+      <a class="pos-link" href="{{ url_for('main.admin_dashboard') }}">
+        <i class="fas fa-arrow-left"></i> Dashboard
+      </a>
+    </div>
+  </header>
+
+  {# Mensajes flash #}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="pos-flashes">
+        {% for category, message in messages %}
+          <div class="pos-alert {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main class="pos-grid">
+
+    <!-- Columna Izquierda: Scanner/Acciones -->
+    <section class="pos-card">
+      <h2><i class="fas fa-barcode"></i> Escaneo</h2>
+      <p class="muted">Escribe el ID del producto (simulando código de barras) y presiona Agregar.</p>
+
+      <form method="POST" class="pos-form">
+        <div class="pos-row">
+          <input
+            class="pos-input"
+            type="text"
+            name="codigo_barras"
+            placeholder="Ej. 1, 2, 3..."
+            autocomplete="off"
+          />
+          <button class="pos-btn primary" type="submit">
+            <i class="fas fa-plus"></i> Agregar
+          </button>
+        </div>
+
+        <div class="pos-actions">
+          <button class="pos-btn success" type="submit" name="accion" value="finalizar">
+            <i class="fas fa-cash-register"></i> Finalizar venta
+          </button>
+
+          <button class="pos-btn ghost" type="submit" name="accion" value="limpiar">
+            <i class="fas fa-broom"></i> Limpiar
+          </button>
+        </div>
+      </form>
+
+      <hr class="pos-hr"/>
+
+      <h3 class="pos-h3"><i class="fas fa-list"></i> Productos disponibles (rápido)</h3>
+      <div class="pos-chips">
+        {% for p in productos_disponibles[:12] %}
+          <button
+            type="button"
+            class="pos-chip"
+            onclick="quickAdd('{{ p.id }}')"
+            title="Agregar {{ p.nombre }}"
+          >
+            #{{ p.id }} · {{ p.nombre }}
+          </button>
+        {% endfor %}
+      </div>
+
+      <small class="muted">
+        Tip: si quieres ver más, amplía el slice en el template o agrega búsqueda.
+      </small>
+    </section>
+
+    <!-- Columna Derecha: Carrito de venta -->
+    <section class="pos-card">
+      <div class="pos-cart-head">
+        <h2><i class="fas fa-shopping-basket"></i> Venta actual</h2>
+        <div class="pos-total">
+          <span class="muted">Total</span>
+          <strong>${{ "{:,.0f}".format(total) }}</strong>
+        </div>
+      </div>
+
+      {% if venta and venta|length > 0 %}
+        <div class="pos-items">
+          {% for item in venta %}
+            <div class="pos-item">
+              <div class="pos-item-img">
+                {% if item.url_imagen %}
+                  <img src="{{ item.url_imagen }}" alt="{{ item.nombre }}">
+                {% else %}
+                  <div class="pos-img-fallback"><i class="fas fa-box"></i></div>
+                {% endif %}
+              </div>
+
+              <div class="pos-item-info">
+                <div class="pos-item-top">
+                  <div>
+                    <div class="pos-item-name">{{ item.nombre }}</div>
+                    <div class="pos-item-meta muted">
+                      {{ item.marca }} · {{ item.tipo }} · ID #{{ item.id }}
+                    </div>
+                  </div>
+                  <div class="pos-item-price">
+                    ${{ "{:,.0f}".format(item.precio) }}
+                  </div>
+                </div>
+
+                <div class="pos-item-bottom">
+                  <div class="pos-qty">
+                    <span class="muted">Cantidad</span>
+                    <strong>{{ item.cantidad }}</strong>
+                  </div>
+
+                  <div class="pos-subtotal">
+                    <span class="muted">Subtotal</span>
+                    <strong>${{ "{:,.0f}".format(item.precio * item.cantidad) }}</strong>
+                  </div>
+
+                  <form method="POST" class="pos-remove">
+                    <input type="hidden" name="accion" value="eliminar_item">
+                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                    <button type="submit" class="pos-icon-btn" title="Eliminar">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+      {% else %}
+        <div class="pos-empty">
+          <div class="pos-empty-ico"><i class="fas fa-receipt"></i></div>
+          <h3>No hay productos en la venta</h3>
+          <p class="muted">Agrega un producto usando el escaneo (ID) o los botones rápidos.</p>
+        </div>
+      {% endif %}
+    </section>
+
+  </main>
+</div>
+
+<style>
+/* ====== POS (solo afecta esta vista) ====== */
+.pos-wrap{max-width:1100px;margin:40px auto;padding:0 16px}
+.pos-header{display:flex;gap:18px;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
+.pos-title h1{margin:0 0 6px 0;font-size:2rem}
+.pos-subtitle{margin:0;color:#666;max-width:720px}
+.pos-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pos-pill{background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 4px 12px rgba(0,0,0,.06);min-width:140px}
+.pos-pill .muted{display:block;font-size:.78rem;color:#888}
+.pos-link{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.06)}
+.pos-link:hover{transform:translateY(-1px)}
+.pos-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:18px}
+.pos-card{background:#fff;border-radius:18px;box-shadow:0 6px 18px rgba(0,0,0,.07);padding:18px}
+.pos-card h2{margin:0 0 10px 0;font-size:1.2rem}
+.pos-h3{margin:0 0 10px 0;font-size:1rem}
+.muted{color:#777}
+.pos-form{margin-top:10px}
+.pos-row{display:flex;gap:10px}
+.pos-input{flex:1;padding:12px 12px;border:1px solid #e5e5e5;border-radius:12px;outline:none;background:#f7f7f7}
+.pos-input:focus{border-color:#1D5A45;background:#fff}
+.pos-actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.pos-btn{border:0;border-radius:12px;padding:12px 14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.pos-btn.primary{background:#1D5A45;color:#fff}
+.pos-btn.primary:hover{background:#144031}
+.pos-btn.success{background:#D97752;color:#fff}
+.pos-btn.success:hover{filter:brightness(.95)}
+.pos-btn.ghost{background:#f2f2f2;color:#222}
+.pos-btn.ghost:hover{background:#eaeaea}
+.pos-hr{border:0;border-top:1px solid #eee;margin:16px 0}
+.pos-chips{display:flex;flex-wrap:wrap;gap:8px}
+.pos-chip{border:1px solid #eee;background:#fafafa;border-radius:999px;padding:8px 10px;cursor:pointer;font-weight:600}
+.pos-chip:hover{background:#1D5A45;color:#fff;border-color:#1D5A45}
+.pos-cart-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.pos-total{display:flex;flex-direction:column;align-items:flex-end}
+.pos-total strong{font-size:1.3rem;color:#1D5A45}
+.pos-items{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.pos-item{display:flex;gap:12px;border:1px solid #f0f0f0;border-radius:16px;padding:12px}
+.pos-item-img{width:84px;height:84px;border-radius:14px;overflow:hidden;background:#f6f6f6;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pos-item-img img{width:100%;height:100%;object-fit:contain}
+.pos-img-fallback{color:#aaa;font-size:1.6rem}
+.pos-item-info{flex:1;display:flex;flex-direction:column;gap:10px}
+.pos-item-top{display:flex;justify-content:space-between;gap:10px}
+.pos-item-name{font-weight:800}
+.pos-item-meta{font-size:.9rem}
+.pos-item-price{font-weight:800;color:#222}
+.pos-item-bottom{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.pos-qty,.pos-subtotal{display:flex;flex-direction:column}
+.pos-subtotal strong{color:#1D5A45}
+.pos-remove{margin-left:auto}
+.pos-icon-btn{border:0;background:transparent;color:#D97752;font-size:1.1rem;cursor:pointer;padding:8px;border-radius:10px}
+.pos-icon-btn:hover{background:rgba(217,119,82,.12)}
+.pos-empty{margin-top:12px;text-align:center;padding:20px;border:1px dashed #e6e6e6;border-radius:16px;background:#fafafa}
+.pos-empty-ico{font-size:2rem;color:#bbb;margin-bottom:6px}
+.pos-flashes{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.pos-alert{padding:12px 14px;border-radius:12px;font-weight:700}
+.pos-alert.success{background:rgba(29,90,69,.12);color:#144031}
+.pos-alert.error{background:rgba(231,76,60,.12);color:#a31414}
+.pos-alert.warning{background:rgba(217,119,82,.15);color:#8a3f26}
+
+@media (max-width: 980px){
+  .pos-grid{grid-template-columns:1fr}
+  .pos-header{flex-direction:column}
+}
+</style>
+
+<script>
+function quickAdd(id){
+  const input = document.querySelector('input[name="codigo_barras"]');
+  input.value = id;
+  input.form.submit();
+}
+</script>
+{% endblock %}

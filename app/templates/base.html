@@ -6,6 +6,7 @@
     <title>{% block title %}La Casa del Gadget{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="icon" href="{{ url_for('static', filename='img/logos/logo.ico') }}">
 </head>
 <body>
     <!-- Top Bar -->
@@ -14,44 +15,83 @@
     </header>
 
     <!-- Navbar principal -->
-    <nav class="navbar">
-        <div class="logo">
-            <a href="{{ url_for('main.index') }}">
-                <img src="{{ url_for('static', filename='img/logos/logo_principal.png') }}" alt="La Casa del Gadget" style="height: 50px;">
-            </a>
-        </div>
-        <div class="search-container">
-            <div class="search-bar">
-                <input type="text" placeholder="Buscar productos...">
-                <button type="submit"><i class="fas fa-search"></i></button>
-            </div>
-        </div>
-        <ul class="nav-links">
+<nav class="navbar">
+  <div class="logo">
+    <a href="{{ url_for('main.index') }}">
+      <img src="{{ url_for('static', filename='img/logos/logo_principal.png') }}"
+           alt="La Casa del Gadget" style="height: 50px;">
+    </a>
+  </div>
+
+  <!-- BUSCADOR FUNCIONAL -->
+  <div class="search-container">
+    <form class="search-bar" method="GET" action="{{ url_for('main.productos_listado') }}">
+      <input
+        type="text"
+        name="q"
+        placeholder="Buscar producto por nombre o marca..."
+        value="{{ request.args.get('q', '') }}"
+      >
+      <button type="submit" aria-label="Buscar">
+        <i class="fas fa-search"></i>
+      </button>
+    </form>
+  </div>
+
+  <ul class="nav-links">
+    <!-- Botón Cita / Probar -->
+    <li>
+      <a href="{{ url_for('main.probar_producto') }}" class="btn-nav btn-primary">
+        <i class="fas fa-laptop"></i> Cita
+      </a>
+    </li>
+
+    <!-- STAFF: si está logeado -> nombre (va a punto_venta) + logout; si no -> botón staff -->
+    {% if session.get('tipo_usuario') == 'staff' %}
+      <li>
+        <a href="{{ url_for('main.punto_venta') }}" class="btn-nav btn-secondary" title="Ir a Punto de Venta">
+          <i class="fas fa-user"></i>
+          {{ session.get('nombre_completo') or session.get('username') or 'Staff' }}
+        </a>
+      </li>
+
+      <li>
+        <a href="{{ url_for('main.logout') }}" class="icon-link logout-btn" title="Cerrar sesión">
+          <i class="fas fa-sign-out-alt"></i>
+        </a>
+      </li>
+    {% else %}
+      <li>
+        <a href="{{ url_for('main.empleados') }}" class="btn-nav btn-secondary">
+          <i class="fas fa-user-tie"></i> Staff
+        </a>
+      </li>
+    {% endif %}
+
+    <!-- Carrito -->
+
+
+    <!-- Login (si quieres ocultarlo cuando staff está logeado, dímelo) -->
+<!-- Login (solo si NO hay staff logeado) -->
+        {% if session.get('tipo_usuario') != 'staff' %}
             <li>
-                <a href="{{ url_for('main.probar_producto') }}" class="btn-nav btn-primary">
-                    <i class="fas fa-laptop"></i> Probar
-                </a>
-            </li>
-            <li>
-                <a href="{{ url_for('main.empleados') }}" class="btn-nav btn-secondary">
-                    <i class="fas fa-user-tie"></i> Staff
-                </a>
-            </li>
-            <li>
-                <a href="{{ url_for('main.login') }}" class="icon-link" title="Iniciar Sesión">
-                    <i class="fas fa-user"></i>
-                </a>
-            </li>
-            <li>
-                <a class="icon-link" href="{{ url_for('main.carrito') }}">
-                <i class="fas fa-shopping-cart"></i>
-                {% if cart_count and cart_count > 0 %}
-                    <span class="cart-count">{{ cart_count }}</span>
-                {% endif %}
-                </a>
-            </li>
-        </ul>
-    </nav>
+      <a class="icon-link" href="{{ url_for('main.carrito') }}" title="Carrito">
+        <i class="fas fa-shopping-cart"></i>
+        {% if cart_count and cart_count > 0 %}
+          <span class="cart-count">{{ cart_count }}</span>
+        {% endif %}
+      </a>
+    </li>
+        <li>
+        <a href="{{ url_for('main.login') }}" class="icon-link" title="Iniciar sesión">
+            <i class="fas fa-user"></i>
+        </a>
+        </li>
+        {% endif %}
+
+  </ul>
+</nav>
+
 
     <!-- Barra de Categorías (separada y debajo del navbar) -->
     <ul class="category-bar">
